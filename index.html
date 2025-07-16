@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Net Yield & Cashflow Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        
+        .input-panel {
+            padding: 40px;
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+        }
+        
+        .results-panel {
+            padding: 40px;
+            background: white;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #0ea5e9;
+        }
+        
+        .metric-card h3 {
+            color: #0369a1;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+        }
+        
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            color: #475569;
+            font-weight: 500;
+        }
+        
+        .metric-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .positive { color: #059669; }
+        .negative { color: #dc2626; }
+        .neutral { color: #6b7280; }
+        .primary { color: #4f46e5; }
+        
+        .yield-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .yield-card {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #10b981;
+        }
+        
+        .yield-card.gross {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #f59e0b;
+        }
+        
+        .yield-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .yield-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+        
+        .rating-card {
+            background: linear-gradient(135deg, #fef7ff 0%, #f3e8ff 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #a855f7;
+            text-align: center;
+        }
+        
+        .rating-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .guidelines {
+            background: #fffbeb;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            border: 1px solid #f59e0b;
+        }
+        
+        .guidelines h3 {
+            color: #92400e;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .guideline-item {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #78350f;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-panel {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            
+            .yield-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Property Analyzer</h1>
+            <p>Professional Net Yield & Cashflow Calculator</p>
+        </div>
+        
+        <div class="content">
+            <div class="input-panel">
+                <h2 class="section-title">📊 Property Details</h2>
+                
+                <div class="input-group">
+                    <label for="address">Property Address</label>
+                    <input type="text" id="address" placeholder="123 Main Street, Suburb, State">
+                </div>
+                
+                <div class="input-group">
+                    <label for="purchasePrice">Purchase Price (AUD)</label>
+                    <input type="number" id="purchasePrice" placeholder="750000" oninput="calculate()">
+                </div>
+                
+                <div class="input-group">
+                    <label for="weeklyRent">Weekly Rent (AUD)</label>
+                    <input type="number" id="weeklyRent" placeholder="550" oninput="calculate()">
+                </div>
+                
+                <div class="input-group">
+                    <label for="managementFee">Management Fee (%)</label>
+                    <input type="number" id="managementFee" value="8" step="0.1" oninput="calculate()">
+                </div>
+                
+                <div class="input-group">
+                    <label for="councilRates">Council Rates (Annual AUD)</label>
+                    <input type="number" id="councilRates" placeholder="2500" oninput="calculate()">
+                </div>
+                
+                <div class="input-group">
+                    <label for="waterRates">Water Rates (Annual AUD)</label>
+                    <input type="number" id="waterRates" placeholder="1200" oninput="calculate()">
+                </div>
+                
+                <div class="input-group">
+                    <label for="insurance">Insurance (Annual AUD)</label>
+                    <input type="number" id="insurance" placeholder="800" oninput="calculate()">
+                </div>
+                
+                <div class="input-group">
+                    <label for="maintenance">Maintenance & Repairs (% of rent)</label>
+                    <input type="number" id="maintenance" value="1" step="0.1" oninput="calculate()">
+                </div>
+                
+                <div class="input-group">
+                    <label for="vacancy">Vacancy Allowance (% of rent)</label>
+                    <input type="number" id="vacancy" value="2" step="0.1" oninput="calculate()">
+                </div>
+                
+                <div class="input-group">
+                    <label for="otherExpenses">Other Expenses (Annual AUD)</label>
+                    <input type="number" id="otherExpenses" placeholder="500" oninput="calculate()">
+                </div>
+            </div>
+            
+            <div class="results-panel">
+                <h2 class="section-title">📈 Analysis Results</h2>
+                
+                <div class="yield-cards">
+                    <div class="yield-card gross">
+                        <div class="yield-value neutral" id="grossYield">0.00%</div>
+                        <div class="yield-label">Gross Yield</div>
+                    </div>
+                    <div class="yield-card">
+                        <div class="yield-value positive" id="netYield">0.00%</div>
+                        <div class="yield-label">Net Yield</div>
+                    </div>
+                </div>
+                
+                <div class="rating-card">
+                    <div class="rating-value neutral" id="investmentRating">Enter property details</div>
+                    <div class="yield-label">Investment Rating</div>
+                </div>
+                
+                <div class="metric-card">
+                    <h3>💰 Cashflow Analysis</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Annual Gross Rent:</span>
+                        <span class="metric-value primary" id="annualRent">$0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Total Outgoings:</span>
+                        <span class="metric-value negative" id="totalOutgoings">-$0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Net Annual Rent:</span>
+                        <span class="metric-value positive" id="netAnnualRent">$0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Weekly Cashflow:</span>
+                        <span class="metric-value primary" id="weeklyCashflow">$0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Monthly Cashflow:</span>
+                        <span class="metric-value primary" id="monthlyCashflow">$0</span>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <h3>📋 Expense Breakdown</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Management Fees:</span>
+                        <span class="metric-value negative" id="managementCost">-$0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Council Rates:</span>
+                        <span class="metric-value negative" id="councilCost">-$0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Water Rates:</span>
+                        <span class="metric-value negative" id="waterCost">-$0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Insurance:</span>
+                        <span class="metric-value negative" id="insuranceCost">-$0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Maintenance:</span>
+                        <span class="metric-value negative" id="maintenanceCost">-$0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Vacancy Allowance:</span>
+                        <span class="metric-value negative" id="vacancyCost">-$0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Other Expenses:</span>
+                        <span class="metric-value negative" id="otherCost">-$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="guidelines">
+            <h3>📚 Investment Guidelines</h3>
+            <div class="guideline-item"><strong>🟢 Excellent (7%+ net yield):</strong> Strong cashflow positive property with good growth potential</div>
+            <div class="guideline-item"><strong>🟡 Good (5-7% net yield):</strong> Solid investment with moderate returns, suitable for stable income</div>
+            <div class="guideline-item"><strong>🔴 Consider carefully (&lt;5% net yield):</strong> May require capital growth to justify investment</div>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value) || 0;
+            const weeklyRent = parseFloat(document.getElementById('weeklyRent').value) || 0;
+            const managementFee = parseFloat(document.getElementById('managementFee').value) || 0;
+            const councilRates = parseFloat(document.getElementById('councilRates').value) || 0;
+            const waterRates = parseFloat(document.getElementById('waterRates').value) || 0;
+            const insurance = parseFloat(document.getElementById('insurance').value) || 0;
+            const maintenance = parseFloat(document.getElementById('maintenance').value) || 0;
+            const vacancy = parseFloat(document.getElementById('vacancy').value) || 0;
+            const otherExpenses = parseFloat(document.getElementById('otherExpenses').value) || 0;
+            
+            const annualRent = weeklyRent * 52;
+            const managementCost = annualRent * (managementFee / 100);
+            const maintenanceCost = annualRent * (maintenance / 100);
+            const vacancyCost = annualRent * (vacancy / 100);
+            const totalOutgoings = managementCost + councilRates + waterRates + insurance + maintenanceCost + vacancyCost + otherExpenses;
+            const netRent = annualRent - totalOutgoings;
+            const grossYield = purchasePrice > 0 ? (annualRent / purchasePrice) * 100 : 0;
+            const netYield = purchasePrice > 0 ? (netRent / purchasePrice) * 100 : 0;
+            
+            const formatCurrency = (amount) => new Intl.NumberFormat('en-AU', {
+                style: 'currency',
+                currency: 'AUD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+            
+            const formatPercent = (percent) => `${percent.toFixed(2)}%`;
+            
+            const getRating = (yield) => {
+                if (yield >= 7) return { text: '🟢 Excellent Investment', class: 'positive' };
+                if (yield >= 5) return { text: '🟡 Good Investment', class: 'neutral' };
+                if (yield > 0) return { text: '🔴 Consider Carefully', class: 'negative' };
+                return { text: 'Enter property details', class: 'neutral' };
+            };
+            
+            const rating = getRating(netYield);
+            
+            // Update displays
+            document.getElementById('grossYield').textContent = formatPercent(grossYield);
+            document.getElementById('netYield').textContent = formatPercent(netYield);
+            document.getElementById('investmentRating').textContent = rating.text;
+            document.getElementById('investmentRating').className = `rating-value ${rating.class}`;
+            
+            document.getElementById('annualRent').textContent = formatCurrency(annualRent);
+            document.getElementById('totalOutgoings').textContent = '-' + formatCurrency(totalOutgoings);
+            document.getElementById('netAnnualRent').textContent = formatCurrency(netRent);
+            document.getElementById('weeklyCashflow').textContent = formatCurrency(netRent / 52);
+            document.getElementById('monthlyCashflow').textContent = formatCurrency(netRent / 12);
+            
+            document.getElementById('managementCost').textContent = '-' + formatCurrency(managementCost);
+            document.getElementById('councilCost').textContent = '-' + formatCurrency(councilRates);
+            document.getElementById('waterCost').textContent = '-' + formatCurrency(waterRates);
+            document.getElementById('insuranceCost').textContent = '-' + formatCurrency(insurance);
+            document.getElementById('maintenanceCost').textContent = '-' + formatCurrency(maintenanceCost);
+            document.getElementById('vacancyCost').textContent = '-' + formatCurrency(vacancyCost);
+            document.getElementById('otherCost').textContent = '-' + formatCurrency(otherExpenses);
+        }
+        
+        // Initialize
+        calculate();
+    </script>
+</body>
+</html>

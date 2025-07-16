@@ -5,229 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Property Analyzer with Notion Integration</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        
         .container {
             max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
         }
-        
         .header {
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             color: white;
             padding: 30px;
             text-align: center;
+            border-radius: 16px 16px 0 0;
         }
-        
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        
-        .notion-integration {
-            background: #f0f9ff;
-            border: 2px solid #0ea5e9;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 40px;
-        }
-        
         .notion-setup {
             background: #fef3c7;
             border: 2px solid #f59e0b;
             border-radius: 12px;
             padding: 20px;
-            margin: 20px 40px;
+            margin: 20px;
         }
-        
-        .content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0;
+        .notion-integration {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px;
         }
-        
-        .input-panel {
-            padding: 40px;
-            background: #f8fafc;
-            border-right: 1px solid #e2e8f0;
-        }
-        
-        .results-panel {
-            padding: 40px;
-            background: white;
-        }
-        
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #334155;
-            margin-bottom: 25px;
-        }
-        
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
-        
         .input-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: 600;
-            color: #475569;
-            font-size: 0.9rem;
         }
-        
         .input-group input {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: white;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
         }
-        
-        .input-group input:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-        
         .button {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: #4f46e5;
             color: white;
             border: none;
             padding: 12px 24px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             margin-right: 10px;
             margin-bottom: 10px;
         }
-        
         .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            background: #3730a3;
         }
-        
-        .button.success {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        }
-        
-        .button.secondary {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-        }
-        
-        .metric-card {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #0ea5e9;
-        }
-        
-        .metric-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(14, 165, 233, 0.1);
-        }
-        
-        .metric-row:last-child {
-            border-bottom: none;
-        }
-        
-        .metric-value {
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-        
-        .positive { color: #059669; }
-        .negative { color: #dc2626; }
-        .neutral { color: #6b7280; }
-        .primary { color: #4f46e5; }
-        
-        .yield-cards {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .yield-card {
-            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid #10b981;
-        }
-        
-        .yield-value {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
-        
         .status-message {
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
             font-weight: 600;
         }
-        
-        .status-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
-        }
-        
-        .status-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #dc2626;
-        }
-        
-        .status-info {
-            background: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #3b82f6;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        @media (max-width: 768px) {
-            .content {
-                grid-template-columns: 1fr;
-            }
-            
-            .input-panel {
-                border-right: none;
-                border-bottom: 1px solid #e2e8f0;
-            }
-            
-            .yield-cards {
-                grid-template-columns: 1fr;
-            }
-        }
+        .status-success { background: #d1fae5; color: #065f46; }
+        .status-error { background: #fee2e2; color: #991b1b; }
+        .status-info { background: #dbeafe; color: #1e40af; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -238,358 +88,36 @@
         </div>
         
         <div class="notion-setup">
-            <h3>🔧 Setup Instructions</h3>
-            <p><strong>Step 1:</strong> Create a Notion integration at <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a></p>
-            <p><strong>Step 2:</strong> Copy your integration token and database ID</p>
-            <p><strong>Step 3:</strong> Enter them below to enable auto-sync</p>
+            <h3>🔧 NOTION SETUP REQUIRED</h3>
+            <p><strong>Step 1:</strong> Create integration at <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a></p>
+            <p><strong>Step 2:</strong> Enter your token and database ID below</p>
         </div>
         
         <div class="notion-integration">
             <h3>📝 Notion Integration Settings</h3>
             <div class="input-group">
-                <label for="notionToken">Notion Integration Token</label>
-                <input type="password" id="notionToken" placeholder="secret_..." onchange="saveNotionSettings()">
+                <label for="notionToken">Integration Token</label>
+                <input type="password" id="notionToken" placeholder="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">
             </div>
             <div class="input-group">
-                <label for="notionDatabaseId">Notion Database ID</label>
-                <input type="text" id="notionDatabaseId" placeholder="32-character database ID" onchange="saveNotionSettings()">
+                <label for="notionDatabaseId">Database ID</label>
+                <input type="text" id="notionDatabaseId" placeholder="23286ed3b47080a3a30dfdaad47df615">
             </div>
+            <button class="button" onclick="saveToNotion()">💾 Save to Notion</button>
             <div id="notionStatus" class="hidden"></div>
         </div>
         
-        <div class="content">
-            <div class="input-panel">
-                <h2 class="section-title">📊 Property Details</h2>
-                
-                <div class="input-group">
-                    <label for="address">Property Address</label>
-                    <input type="text" id="address" placeholder="123 Main Street, Suburb, State" onchange="calculate()">
-                </div>
-                
-                <div class="input-group">
-                    <label for="purchasePrice">Purchase Price (AUD)</label>
-                    <input type="number" id="purchasePrice" placeholder="750000" oninput="calculate()">
-                </div>
-                
-                <div class="input-group">
-                    <label for="weeklyRent">Weekly Rent (AUD)</label>
-                    <input type="number" id="weeklyRent" placeholder="550" oninput="calculate()">
-                </div>
-                
-                <div class="input-group">
-                    <label for="managementFee">Management Fee (%)</label>
-                    <input type="number" id="managementFee" value="8" step="0.1" oninput="calculate()">
-                </div>
-                
-                <div class="input-group">
-                    <label for="councilRates">Council Rates (Annual)</label>
-                    <input type="number" id="councilRates" placeholder="2500" oninput="calculate()">
-                </div>
-                
-                <div class="input-group">
-                    <label for="waterRates">Water Rates (Annual)</label>
-                    <input type="number" id="waterRates" placeholder="1200" oninput="calculate()">
-                </div>
-                
-                <div class="input-group">
-                    <label for="insurance">Insurance (Annual)</label>
-                    <input type="number" id="insurance" placeholder="800" oninput="calculate()">
-                </div>
-                
-                <div class="input-group">
-                    <label for="maintenance">Maintenance (%)</label>
-                    <input type="number" id="maintenance" value="1" step="0.1" oninput="calculate()">
-                </div>
-                
-                <div class="input-group">
-                    <label for="vacancy">Vacancy (%)</label>
-                    <input type="number" id="vacancy" value="2" step="0.1" oninput="calculate()">
-                </div>
-                
-                <div class="input-group">
-                    <label for="otherExpenses">Other Expenses (Annual)</label>
-                    <input type="number" id="otherExpenses" placeholder="500" oninput="calculate()">
-                </div>
-                
-                <div style="margin-top: 30px;">
-                    <button class="button success" onclick="saveToNotion()">💾 Save to Notion</button>
-                    <button class="button secondary" onclick="generateShareableLink()">🔗 Generate Link</button>
-                    <button class="button" onclick="loadFromURL()">📥 Load from URL</button>
-                </div>
-            </div>
-            
-            <div class="results-panel">
-                <h2 class="section-title">📈 Analysis Results</h2>
-                
-                <div class="yield-cards">
-                    <div class="yield-card">
-                        <div class="yield-value neutral" id="grossYield">0.00%</div>
-                        <div>Gross Yield</div>
-                    </div>
-                    <div class="yield-card">
-                        <div class="yield-value positive" id="netYield">0.00%</div>
-                        <div>Net Yield</div>
-                    </div>
-                </div>
-                
-                <div class="metric-card">
-                    <h3>💰 Cashflow Analysis</h3>
-                    <div class="metric-row">
-                        <span>Annual Gross Rent:</span>
-                        <span class="metric-value primary" id="annualRent">$0</span>
-                    </div>
-                    <div class="metric-row">
-                        <span>Total Outgoings:</span>
-                        <span class="metric-value negative" id="totalOutgoings">-$0</span>
-                    </div>
-                    <div class="metric-row">
-                        <span>Net Annual Rent:</span>
-                        <span class="metric-value positive" id="netAnnualRent">$0</span>
-                    </div>
-                    <div class="metric-row">
-                        <span>Weekly Cashflow:</span>
-                        <span class="metric-value primary" id="weeklyCashflow">$0</span>
-                    </div>
-                    <div class="metric-row">
-                        <span>Monthly Cashflow:</span>
-                        <span class="metric-value primary" id="monthlyCashflow">$0</span>
-                    </div>
-                </div>
-                
-                <div class="metric-card">
-                    <h3>📋 Investment Rating</h3>
-                    <div class="metric-row">
-                        <span>Rating:</span>
-                        <span class="metric-value" id="investmentRating">Enter details</span>
-                    </div>
-                </div>
-            </div>
+        <div style="padding: 20px; text-align: center;">
+            <h2>🚀 INTEGRATION TEST VERSION</h2>
+            <p>This is a simplified version to test the Notion integration.</p>
+            <p>If the yellow and blue boxes above are visible, the update worked!</p>
         </div>
     </div>
 
     <script>
-        let currentData = {};
-        
-        // Load URL parameters on page load
-        window.onload = function() {
-            loadFromURL();
-            loadNotionSettings();
-        };
-        
-        function loadFromURL() {
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // Load data from URL parameters
-            const fields = ['address', 'purchasePrice', 'weeklyRent', 'managementFee', 'councilRates', 'waterRates', 'insurance', 'maintenance', 'vacancy', 'otherExpenses'];
-            
-            fields.forEach(field => {
-                const value = urlParams.get(field);
-                if (value) {
-                    document.getElementById(field).value = value;
-                }
-            });
-            
-            calculate();
+        function saveToNotion() {
+            alert("Notion integration test - this confirms the new code is loaded!");
         }
-        
-        function generateShareableLink() {
-            const baseUrl = window.location.origin + window.location.pathname;
-            const params = new URLSearchParams();
-            
-            const fields = ['address', 'purchasePrice', 'weeklyRent', 'managementFee', 'councilRates', 'waterRates', 'insurance', 'maintenance', 'vacancy', 'otherExpenses'];
-            
-            fields.forEach(field => {
-                const value = document.getElementById(field).value;
-                if (value) {
-                    params.append(field, value);
-                }
-            });
-            
-            const shareableUrl = `${baseUrl}?${params.toString()}`;
-            
-            // Copy to clipboard
-            navigator.clipboard.writeText(shareableUrl).then(() => {
-                showStatus('🔗 Shareable link copied to clipboard!', 'success');
-            });
-        }
-        
-        function saveNotionSettings() {
-            const token = document.getElementById('notionToken').value;
-            const databaseId = document.getElementById('notionDatabaseId').value;
-            
-            if (token && databaseId) {
-                localStorage.setItem('notionToken', token);
-                localStorage.setItem('notionDatabaseId', databaseId);
-                showStatus('✅ Notion settings saved!', 'success');
-            }
-        }
-        
-        function loadNotionSettings() {
-            const token = localStorage.getItem('notionToken');
-            const databaseId = localStorage.getItem('notionDatabaseId');
-            
-            if (token) document.getElementById('notionToken').value = token;
-            if (databaseId) document.getElementById('notionDatabaseId').value = databaseId;
-        }
-        
-        async function saveToNotion() {
-            const token = document.getElementById('notionToken').value;
-            const databaseId = document.getElementById('notionDatabaseId').value;
-            
-            if (!token || !databaseId) {
-                showStatus('❌ Please enter Notion token and database ID first', 'error');
-                return;
-            }
-            
-            const propertyData = {
-                address: document.getElementById('address').value,
-                purchasePrice: parseFloat(document.getElementById('purchasePrice').value) || 0,
-                weeklyRent: parseFloat(document.getElementById('weeklyRent').value) || 0,
-                managementFee: parseFloat(document.getElementById('managementFee').value) || 0,
-                councilRates: parseFloat(document.getElementById('councilRates').value) || 0,
-                waterRates: parseFloat(document.getElementById('waterRates').value) || 0,
-                insurance: parseFloat(document.getElementById('insurance').value) || 0,
-                maintenance: parseFloat(document.getElementById('maintenance').value) || 0,
-                vacancy: parseFloat(document.getElementById('vacancy').value) || 0,
-                otherExpenses: parseFloat(document.getElementById('otherExpenses').value) || 0
-            };
-            
-            // Calculate results
-            const annualRent = propertyData.weeklyRent * 52;
-            const totalOutgoings = (annualRent * propertyData.managementFee / 100) +
-                                 propertyData.councilRates + propertyData.waterRates + propertyData.insurance +
-                                 (annualRent * propertyData.maintenance / 100) + 
-                                 (annualRent * propertyData.vacancy / 100) + 
-                                 propertyData.otherExpenses;
-            const netRent = annualRent - totalOutgoings;
-            const netYield = propertyData.purchasePrice > 0 ? (netRent / propertyData.purchasePrice) * 100 : 0;
-            
-            // Notion API payload
-            const notionPayload = {
-                parent: { database_id: databaseId },
-                properties: {
-                    "Property Address": {
-                        title: [{ text: { content: propertyData.address || "Untitled Property" } }]
-                    },
-                    "Purchase Price": {
-                        number: propertyData.purchasePrice
-                    },
-                    "Weekly Rent": {
-                        number: propertyData.weeklyRent
-                    },
-                    "Net Yield": {
-                        number: Math.round(netYield * 100) / 100
-                    },
-                    "Annual Cashflow": {
-                        number: Math.round(netRent)
-                    },
-                    "Monthly Cashflow": {
-                        number: Math.round(netRent / 12)
-                    },
-                    "Total Outgoings": {
-                        number: Math.round(totalOutgoings)
-                    },
-                    "Date Analyzed": {
-                        date: { start: new Date().toISOString().split('T')[0] }
-                    }
-                }
-            };
-            
-            try {
-                showStatus('⏳ Saving to Notion...', 'info');
-                
-                const response = await fetch('https://api.notion.com/v1/pages', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                        'Notion-Version': '2022-06-28'
-                    },
-                    body: JSON.stringify(notionPayload)
-                });
-                
-                if (response.ok) {
-                    showStatus('✅ Property saved to Notion successfully!', 'success');
-                } else {
-                    const error = await response.json();
-                    showStatus(`❌ Error: ${error.message}`, 'error');
-                }
-            } catch (error) {
-                showStatus(`❌ Error: ${error.message}`, 'error');
-            }
-        }
-        
-        function showStatus(message, type) {
-            const statusElement = document.getElementById('notionStatus');
-            statusElement.className = `status-message status-${type}`;
-            statusElement.textContent = message;
-            statusElement.classList.remove('hidden');
-            
-            setTimeout(() => {
-                statusElement.classList.add('hidden');
-            }, 5000);
-        }
-        
-        function calculate() {
-            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value) || 0;
-            const weeklyRent = parseFloat(document.getElementById('weeklyRent').value) || 0;
-            const managementFee = parseFloat(document.getElementById('managementFee').value) || 0;
-            const councilRates = parseFloat(document.getElementById('councilRates').value) || 0;
-            const waterRates = parseFloat(document.getElementById('waterRates').value) || 0;
-            const insurance = parseFloat(document.getElementById('insurance').value) || 0;
-            const maintenance = parseFloat(document.getElementById('maintenance').value) || 0;
-            const vacancy = parseFloat(document.getElementById('vacancy').value) || 0;
-            const otherExpenses = parseFloat(document.getElementById('otherExpenses').value) || 0;
-            
-            const annualRent = weeklyRent * 52;
-            const managementCost = annualRent * (managementFee / 100);
-            const maintenanceCost = annualRent * (maintenance / 100);
-            const vacancyCost = annualRent * (vacancy / 100);
-            const totalOutgoings = managementCost + councilRates + waterRates + insurance + maintenanceCost + vacancyCost + otherExpenses;
-            const netRent = annualRent - totalOutgoings;
-            const grossYield = purchasePrice > 0 ? (annualRent / purchasePrice) * 100 : 0;
-            const netYield = purchasePrice > 0 ? (netRent / purchasePrice) * 100 : 0;
-            
-            const formatCurrency = (amount) => new Intl.NumberFormat('en-AU', {
-                style: 'currency',
-                currency: 'AUD',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(amount);
-            
-            const formatPercent = (percent) => `${percent.toFixed(2)}%`;
-            
-            const getRating = (yield) => {
-                if (yield >= 7) return { text: '🟢 Excellent', class: 'positive' };
-                if (yield >= 5) return { text: '🟡 Good', class: 'neutral' };
-                if (yield > 0) return { text: '🔴 Consider Carefully', class: 'negative' };
-                return { text: 'Enter details', class: 'neutral' };
-            };
-            
-            const rating = getRating(netYield);
-            
-            // Update displays
-            document.getElementById('grossYield').textContent = formatPercent(grossYield);
-            document.getElementById('netYield').textContent = formatPercent(netYield);
-            document.getElementById('investmentRating').textContent = rating.text;
-            document.getElementById('investmentRating').className = `metric-value ${rating.class}`;
-            
-            document.getElementById('annualRent').textContent = formatCurrency(annualRent);
-            document.getElementById('totalOutgoings').textContent = '-' + formatCurrency(totalOutgoings);
-            document.getElementById('netAnnualRent').textContent = formatCurrency(netRent);
-            document.getElementById('weeklyCashflow').textContent = formatCurrency(netRent / 52);
-            document.getElementById('monthlyCashflow').textContent = formatCurrency(netRent / 12);
-            
-            // Store current data
-            currentData = {
-                purchasePrice, weeklyRent, managementFee, councilRates, waterRates, 
-                insurance, maintenance, vacancy, otherExpenses, annualRent, 
-                totalOutgoings, netRent, grossYield, netYield
-            };
-        }
-        
-        // Initialize
-        calculate();
     </script>
 </body>
 </html>

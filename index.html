@@ -326,15 +326,15 @@
         </div>
         
         <div class="cors-info">
-            <strong>🚀 n8n INTEGRATION:</strong> Automatic save to Notion via n8n webhook - no CORS issues!
+            <strong>🚀 n8n PRODUCTION:</strong> Automatic save to Notion via production webhook - fully automated!
         </div>
         
         <div class="notion-integration">
             <h3>🔗 n8n Webhook Integration</h3>
             <div class="integration-inputs">
                 <div class="input-group">
-                    <label for="webhookUrl">n8n Webhook URL</label>
-                    <input type="text" id="webhookUrl" placeholder="https://sngroup.app.n8n.cloud/webhook-test/property-analyzer" value="https://sngroup.app.n8n.cloud/webhook-test/property-analyzer">
+                    <label for="webhookUrl">n8n Production Webhook URL</label>
+                    <input type="text" id="webhookUrl" value="https://sngroup.app.n8n.cloud/webhook/property-analyzer" readonly>
                 </div>
             </div>
             <div id="notionStatus" class="hidden"></div>
@@ -664,7 +664,7 @@ Date: ${new Date().toISOString().split('T')[0]}`;
                 dateAnalyzed: new Date().toISOString().split('T')[0]
             };
             
-            showStatus('⏳ Sending to n8n webhook...', 'info');
+            showStatus('⏳ Sending to n8n production webhook...', 'info');
             
             try {
                 const response = await fetch(webhookUrl, {
@@ -676,12 +676,12 @@ Date: ${new Date().toISOString().split('T')[0]}`;
                 });
                 
                 if (response.ok) {
-                    showStatus(`✅ "${data.address}" sent to Notion via n8n! Net Yield: ${data.netYield.toFixed(2)}%`, 'success');
+                    showStatus(`✅ "${data.address}" saved to Notion via n8n! Net Yield: ${data.netYield.toFixed(2)}%`, 'success');
                 } else {
-                    showStatus(`❌ n8n webhook error: ${response.status}. Check your webhook URL.`, 'error');
+                    showStatus(`❌ n8n webhook error: ${response.status}. Make sure workflow is activated.`, 'error');
                 }
             } catch (error) {
-                showStatus(`❌ Connection failed: ${error.message}`, 'error');
+                showStatus(`❌ Connection failed: ${error.message}. Check if n8n workflow is active.`, 'error');
                 console.error('n8n webhook error:', error);
             }
         }

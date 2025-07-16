@@ -652,9 +652,9 @@ Date: ${new Date().toISOString().split('T')[0]}`;
             
             const data = getCurrentCalculations();
             
-            // Prepare payload for n8n
+            // Prepare payload for n8n (matching field names in n8n workflow)
             const payload = {
-                address: data.address,
+                propertyAddress: data.address,
                 purchasePrice: data.purchasePrice,
                 weeklyRent: data.weeklyRent,
                 netYield: Math.round(data.netYield * 100) / 100,

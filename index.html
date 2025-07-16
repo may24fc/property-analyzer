@@ -48,15 +48,13 @@
             margin: 20px;
         }
         
-        .notion-status {
-            background: #d1fae5;
-            border: 2px solid #10b981;
+        .cors-info {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
             border-radius: 12px;
             padding: 15px;
             margin: 20px;
-            text-align: center;
-            font-weight: 600;
-            color: #065f46;
+            font-size: 14px;
         }
         
         .content {
@@ -230,6 +228,10 @@
             background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
         }
         
+        .button.clipboard {
+            background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+        }
+        
         .status-message {
             padding: 15px;
             border-radius: 8px;
@@ -323,6 +325,10 @@
             <p>Professional Calculator with Automatic Notion Integration</p>
         </div>
         
+        <div class="cors-info">
+            <strong>🔧 CORS Fix Applied:</strong> This version uses multiple methods to connect with Notion API, including proxy services and clipboard backup.
+        </div>
+        
         <div class="notion-integration">
             <h3>📝 Notion Integration Settings</h3>
             <div class="integration-inputs">
@@ -394,6 +400,7 @@
                 
                 <div style="margin-top: 30px;">
                     <button class="button success" onclick="saveToNotion()">💾 Save to Notion</button>
+                    <button class="button clipboard" onclick="copyToClipboard()">📋 Copy Data</button>
                     <button class="button secondary" onclick="generateShareableLink()">🔗 Generate Link</button>
                     <button class="button" onclick="loadFromURL()">📥 Load from URL</button>
                 </div>
@@ -552,119 +559,35 @@
             if (databaseId) document.getElementById('notionDatabaseId').value = databaseId;
         }
         
-        async function saveToNotion() {
-            const token = document.getElementById('notionToken').value;
-            const databaseId = document.getElementById('notionDatabaseId').value;
+        function copyToClipboard() {
             const address = document.getElementById('address').value;
-            
-            if (!token || !databaseId) {
-                showStatus('❌ Please enter Notion token and database ID first', 'error');
-                return;
-            }
-            
             if (!address) {
                 showStatus('❌ Please enter a property address first', 'error');
                 return;
             }
             
-            // Gather all property data
-            const propertyData = {
-                address: address,
-                purchasePrice: parseFloat(document.getElementById('purchasePrice').value) || 0,
-                weeklyRent: parseFloat(document.getElementById('weeklyRent').value) || 0,
-                managementFee: parseFloat(document.getElementById('managementFee').value) || 0,
-                councilRates: parseFloat(document.getElementById('councilRates').value) || 0,
-                waterRates: parseFloat(document.getElementById('waterRates').value) || 0,
-                insurance: parseFloat(document.getElementById('insurance').value) || 0,
-                maintenance: parseFloat(document.getElementById('maintenance').value) || 0,
-                vacancy: parseFloat(document.getElementById('vacancy').value) || 0,
-                otherExpenses: parseFloat(document.getElementById('otherExpenses').value) || 0
-            };
+            // Get current calculations
+            const data = getCurrentCalculations();
             
-            // Calculate results
-            const annualRent = propertyData.weeklyRent * 52;
-            const managementCost = annualRent * (propertyData.managementFee / 100);
-            const maintenanceCost = annualRent * (propertyData.maintenance / 100);
-            const vacancyCost = annualRent * (propertyData.vacancy / 100);
-            const totalOutgoings = managementCost + propertyData.councilRates + propertyData.waterRates + 
-                                 propertyData.insurance + maintenanceCost + vacancyCost + propertyData.otherExpenses;
-            const netRent = annualRent - totalOutgoings;
-            const grossYield = propertyData.purchasePrice > 0 ? (annualRent / propertyData.purchasePrice) * 100 : 0;
-            const netYield = propertyData.purchasePrice > 0 ? (netRent / propertyData.purchasePrice) * 100 : 0;
+            // Format for Notion table
+            const notionFormat = `Property Address: ${data.address}
+Purchase Price: $${data.purchasePrice.toLocaleString()}
+Weekly Rent: $${data.weeklyRent}
+Net Yield: ${data.netYield.toFixed(2)}%
+Annual Cashflow: $${Math.round(data.netRent).toLocaleString()}
+Monthly Cashflow: $${Math.round(data.netRent / 12).toLocaleString()}
+Total Outgoings: $${Math.round(data.totalOutgoings).toLocaleString()}
+Date Analyzed: ${new Date().toISOString().split('T')[0]}`;
             
-            // Notion API payload
-            const notionPayload = {
-                parent: { database_id: databaseId },
-                properties: {
-                    "Property Address": {
-                        title: [{ text: { content: propertyData.address } }]
-                    },
-                    "Purchase Price": {
-                        number: propertyData.purchasePrice
-                    },
-                    "Weekly Rent": {
-                        number: propertyData.weeklyRent
-                    },
-                    "Net Yield": {
-                        number: Math.round(netYield * 100) / 100
-                    },
-                    "Annual Cashflow": {
-                        number: Math.round(netRent)
-                    },
-                    "Monthly Cashflow": {
-                        number: Math.round(netRent / 12)
-                    },
-                    "Total Outgoings": {
-                        number: Math.round(totalOutgoings)
-                    },
-                    "Date Analyzed": {
-                        date: { start: new Date().toISOString().split('T')[0] }
-                    }
-                }
-            };
-            
-            try {
-                showStatus('⏳ Saving property analysis to Notion...', 'info');
-                
-                const response = await fetch('https://api.notion.com/v1/pages', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                        'Notion-Version': '2022-06-28'
-                    },
-                    body: JSON.stringify(notionPayload)
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    showStatus(`✅ "${propertyData.address}" saved to Notion successfully! Net Yield: ${netYield.toFixed(2)}%`, 'success');
-                } else {
-                    const error = await response.json();
-                    console.error('Notion API Error:', error);
-                    showStatus(`❌ Error: ${error.message || 'Failed to save to Notion'}`, 'error');
-                }
-            } catch (error) {
-                console.error('Network Error:', error);
-                showStatus(`❌ Network Error: ${error.message}`, 'error');
-            }
+            navigator.clipboard.writeText(notionFormat).then(() => {
+                showStatus('📋 Property data copied to clipboard! You can paste this into Notion manually.', 'success');
+            }).catch(() => {
+                showStatus('❌ Failed to copy to clipboard', 'error');
+            });
         }
         
-        function showStatus(message, type) {
-            const statusElement = document.getElementById('notionStatus');
-            statusElement.className = `status-message status-${type}`;
-            statusElement.textContent = message;
-            statusElement.classList.remove('hidden');
-            
-            // Auto-hide after 8 seconds for success messages
-            if (type === 'success') {
-                setTimeout(() => {
-                    statusElement.classList.add('hidden');
-                }, 8000);
-            }
-        }
-        
-        function calculate() {
+        function getCurrentCalculations() {
+            const address = document.getElementById('address').value;
             const purchasePrice = parseFloat(document.getElementById('purchasePrice').value) || 0;
             const weeklyRent = parseFloat(document.getElementById('weeklyRent').value) || 0;
             const managementFee = parseFloat(document.getElementById('managementFee').value) || 0;
@@ -734,4 +657,159 @@
         calculate();
     </script>
 </body>
-</html>
+</html>vacancy / 100);
+            const totalOutgoings = managementCost + councilRates + waterRates + insurance + maintenanceCost + vacancyCost + otherExpenses;
+            const netRent = annualRent - totalOutgoings;
+            const grossYield = purchasePrice > 0 ? (annualRent / purchasePrice) * 100 : 0;
+            const netYield = purchasePrice > 0 ? (netRent / purchasePrice) * 100 : 0;
+            
+            return {
+                address, purchasePrice, weeklyRent, managementFee, councilRates, waterRates,
+                insurance, maintenance, vacancy, otherExpenses, annualRent, managementCost,
+                maintenanceCost, vacancyCost, totalOutgoings, netRent, grossYield, netYield
+            };
+        }
+        
+        async function saveToNotion() {
+            const token = document.getElementById('notionToken').value;
+            const databaseId = document.getElementById('notionDatabaseId').value;
+            const address = document.getElementById('address').value;
+            
+            if (!token || !databaseId) {
+                showStatus('❌ Please enter Notion token and database ID first', 'error');
+                return;
+            }
+            
+            if (!address) {
+                showStatus('❌ Please enter a property address first', 'error');
+                return;
+            }
+            
+            const data = getCurrentCalculations();
+            
+            // Notion API payload
+            const notionPayload = {
+                parent: { database_id: databaseId },
+                properties: {
+                    "Property Address": {
+                        title: [{ text: { content: data.address } }]
+                    },
+                    "Purchase Price": {
+                        number: data.purchasePrice
+                    },
+                    "Weekly Rent": {
+                        number: data.weeklyRent
+                    },
+                    "Net Yield": {
+                        number: Math.round(data.netYield * 100) / 100
+                    },
+                    "Annual Cashflow": {
+                        number: Math.round(data.netRent)
+                    },
+                    "Monthly Cashflow": {
+                        number: Math.round(data.netRent / 12)
+                    },
+                    "Total Outgoings": {
+                        number: Math.round(data.totalOutgoings)
+                    },
+                    "Date Analyzed": {
+                        date: { start: new Date().toISOString().split('T')[0] }
+                    }
+                }
+            };
+            
+            // Try multiple proxy services
+            const proxyServices = [
+                'https://api.allorigins.win/raw?url=',
+                'https://cors-anywhere.herokuapp.com/',
+                'https://thingproxy.freeboard.io/fetch/'
+            ];
+            
+            showStatus('⏳ Attempting to save to Notion (trying multiple connection methods)...', 'info');
+            
+            for (let i = 0; i < proxyServices.length; i++) {
+                try {
+                    const proxyUrl = proxyServices[i];
+                    const notionUrl = 'https://api.notion.com/v1/pages';
+                    
+                    let fetchUrl, fetchOptions;
+                    
+                    if (proxyUrl.includes('allorigins')) {
+                        fetchUrl = proxyUrl + encodeURIComponent(notionUrl);
+                        fetchOptions = {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Content-Type': 'application/json',
+                                    'Notion-Version': '2022-06-28'
+                                },
+                                body: JSON.stringify(notionPayload)
+                            })
+                        };
+                    } else {
+                        fetchUrl = proxyUrl + notionUrl;
+                        fetchOptions = {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json',
+                                'Notion-Version': '2022-06-28',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify(notionPayload)
+                        };
+                    }
+                    
+                    const response = await fetch(fetchUrl, fetchOptions);
+                    
+                    if (response.ok) {
+                        showStatus(`✅ "${data.address}" saved to Notion successfully! Net Yield: ${data.netYield.toFixed(2)}%`, 'success');
+                        return;
+                    }
+                } catch (error) {
+                    console.log(`Proxy ${i + 1} failed:`, error);
+                    continue;
+                }
+            }
+            
+            // If all proxies fail, show clipboard option
+            showStatus('⚠️ Direct API connection failed. Use "📋 Copy Data" button to manually paste into Notion.', 'error');
+            
+            // Auto-copy as fallback
+            copyToClipboard();
+        }
+        
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('notionStatus');
+            statusElement.className = `status-message status-${type}`;
+            statusElement.textContent = message;
+            statusElement.classList.remove('hidden');
+            
+            // Auto-hide after 8 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusElement.classList.add('hidden');
+                }, 8000);
+            }
+        }
+        
+        function calculate() {
+            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value) || 0;
+            const weeklyRent = parseFloat(document.getElementById('weeklyRent').value) || 0;
+            const managementFee = parseFloat(document.getElementById('managementFee').value) || 0;
+            const councilRates = parseFloat(document.getElementById('councilRates').value) || 0;
+            const waterRates = parseFloat(document.getElementById('waterRates').value) || 0;
+            const insurance = parseFloat(document.getElementById('insurance').value) || 0;
+            const maintenance = parseFloat(document.getElementById('maintenance').value) || 0;
+            const vacancy = parseFloat(document.getElementById('vacancy').value) || 0;
+            const otherExpenses = parseFloat(document.getElementById('otherExpenses').value) || 0;
+            
+            const annualRent = weeklyRent * 52;
+            const managementCost = annualRent * (managementFee / 100);
+            const maintenanceCost = annualRent * (maintenance / 100);
+            const vacancyCost = annualRent * (

@@ -49,8 +49,8 @@
         }
         
         .cors-info {
-            background: #fef3c7;
-            border: 2px solid #f59e0b;
+            background: #d1fae5;
+            border: 2px solid #10b981;
             border-radius: 12px;
             padding: 15px;
             margin: 20px;
@@ -264,7 +264,7 @@
         
         .integration-inputs {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -322,23 +322,19 @@
     <div class="container">
         <div class="header">
             <h1>🏠 Property Net Yield Analyzer</h1>
-            <p>Professional Calculator with Automatic Notion Integration</p>
+            <p>Professional Calculator with n8n → Notion Automation</p>
         </div>
         
         <div class="cors-info">
-            <strong>🔧 FIXED VERSION:</strong> JavaScript calculation functions restored and working properly.
+            <strong>🚀 n8n INTEGRATION:</strong> Automatic save to Notion via n8n webhook - no CORS issues!
         </div>
         
         <div class="notion-integration">
-            <h3>📝 Notion Integration Settings</h3>
+            <h3>🔗 n8n Webhook Integration</h3>
             <div class="integration-inputs">
                 <div class="input-group">
-                    <label for="notionToken">Integration Token</label>
-                    <input type="password" id="notionToken" placeholder="ntn_..." value="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">
-                </div>
-                <div class="input-group">
-                    <label for="notionDatabaseId">Database ID</label>
-                    <input type="text" id="notionDatabaseId" placeholder="32-character ID" value="23286ed3b47080a3a30dfdaad47df615">
+                    <label for="webhookUrl">n8n Webhook URL</label>
+                    <input type="text" id="webhookUrl" placeholder="https://sngroup.app.n8n.cloud/webhook-test/property-analyzer" value="https://sngroup.app.n8n.cloud/webhook-test/property-analyzer">
                 </div>
             </div>
             <div id="notionStatus" class="hidden"></div>
@@ -399,7 +395,7 @@
                 </div>
                 
                 <div style="margin-top: 30px;">
-                    <button class="button success" onclick="saveToNotion()">💾 Save to Notion</button>
+                    <button class="button success" onclick="saveToNotion()">💾 Save to Notion (via n8n)</button>
                     <button class="button clipboard" onclick="copyToClipboard()">📋 Copy Data</button>
                     <button class="button secondary" onclick="generateShareableLink()">🔗 Generate Link</button>
                 </div>
@@ -641,12 +637,11 @@ Date: ${new Date().toISOString().split('T')[0]}`;
         }
         
         async function saveToNotion() {
-            const token = document.getElementById('notionToken').value;
-            const databaseId = document.getElementById('notionDatabaseId').value;
+            const webhookUrl = document.getElementById('webhookUrl').value;
             const address = document.getElementById('address').value;
             
-            if (!token || !databaseId) {
-                showStatus('❌ Please enter Notion token and database ID first', 'error');
+            if (!webhookUrl) {
+                showStatus('❌ Please enter n8n webhook URL first', 'error');
                 return;
             }
             
@@ -657,59 +652,37 @@ Date: ${new Date().toISOString().split('T')[0]}`;
             
             const data = getCurrentCalculations();
             
-            const notionPayload = {
-                parent: { database_id: databaseId },
-                properties: {
-                    "Property Address": {
-                        title: [{ text: { content: data.address } }]
-                    },
-                    "Purchase Price": {
-                        number: data.purchasePrice
-                    },
-                    "Weekly Rent": {
-                        number: data.weeklyRent
-                    },
-                    "Net Yield": {
-                        number: Math.round(data.netYield * 100) / 100
-                    },
-                    "Annual Cashflow": {
-                        number: Math.round(data.netRent)
-                    },
-                    "Monthly Cashflow": {
-                        number: Math.round(data.netRent / 12)
-                    },
-                    "Total Outgoings": {
-                        number: Math.round(data.totalOutgoings)
-                    },
-                    "Date Analyzed": {
-                        date: { start: new Date().toISOString().split('T')[0] }
-                    }
-                }
+            // Prepare payload for n8n
+            const payload = {
+                address: data.address,
+                purchasePrice: data.purchasePrice,
+                weeklyRent: data.weeklyRent,
+                netYield: Math.round(data.netYield * 100) / 100,
+                annualCashflow: Math.round(data.netRent),
+                monthlyCashflow: Math.round(data.netRent / 12),
+                totalOutgoings: Math.round(data.totalOutgoings),
+                dateAnalyzed: new Date().toISOString().split('T')[0]
             };
             
-            showStatus('⏳ Attempting to save to Notion...', 'info');
+            showStatus('⏳ Sending to n8n webhook...', 'info');
             
             try {
-                const response = await fetch('https://api.notion.com/v1/pages', {
+                const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
-                        'Notion-Version': '2022-06-28'
                     },
-                    body: JSON.stringify(notionPayload)
+                    body: JSON.stringify(payload)
                 });
                 
                 if (response.ok) {
-                    showStatus(`✅ "${data.address}" saved to Notion! Net Yield: ${data.netYield.toFixed(2)}%`, 'success');
+                    showStatus(`✅ "${data.address}" sent to Notion via n8n! Net Yield: ${data.netYield.toFixed(2)}%`, 'success');
                 } else {
-                    const error = await response.json();
-                    showStatus(`❌ Notion Error: ${error.message}. Use Copy Data button instead.`, 'error');
-                    copyToClipboard();
+                    showStatus(`❌ n8n webhook error: ${response.status}. Check your webhook URL.`, 'error');
                 }
             } catch (error) {
-                showStatus('⚠️ Connection failed. Data copied to clipboard instead.', 'error');
-                copyToClipboard();
+                showStatus(`❌ Connection failed: ${error.message}`, 'error');
+                console.error('n8n webhook error:', error);
             }
         }
         
